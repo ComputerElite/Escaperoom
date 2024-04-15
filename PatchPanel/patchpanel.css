@@ -1,6 +1,8 @@
 body {
     background-color: var(--bg);
     color: #EEEEEE;
+    font-family: 'Open Sans';
+    padding: 10px;
 }
 
 :root {
@@ -15,11 +17,14 @@ body {
 .column {
     display: flex;
     flex-direction: column;
+    margin-right: 10px;
+    align-items: center;
 }
 
 #canvas {
-    position:absolute;
-    border:1px solid red;
+    position: absolute;
+    top: 0;
+    bottom: 0;
     width:100%;
     height:100%;
 }
