@@ -8,14 +8,17 @@
         <canvas id="canvas" width=300 height=300></canvas>
         <div class="grid">
             <div class="column">
-                <div class="hole" id="11">11</div>
-                <div class="hole" id="12">12</div>
-                <div class="hole" id="13">13</div>
+                <div class="node" id="11" type="power">11</div>
+                <div class="node" id="12" connectedWith="21">12</div>
+                <div class="node" id="13">13</div>
             </div>
             <div class="column">
-                <div class="hole" id="21">21</div>
-                <div class="hole" id="22">22</div>
-                <div class="hole" id="23">23</div>
+                <div class="node" id="21">21</div>
+                <div class="node" id="22">22</div>
+                <div class="node" connectedWith="31" id="23">23</div>
+            </div>
+            <div class="column">
+                <div class="node" id="31" type="light" disabled>L</div>
             </div>
         </div>
         <script>
@@ -29,82 +32,118 @@
             var offsetX = canvas.offsetLeft;
             var offsetY = canvas.offsetTop;
 
-            var holes = []
-            for(const e of document.getElementsByClassName("hole")) {
-                e.onclick = (e) => {
-                    OnHoleClicked(e.target.id)
-                }
-                holes.push({
-                    id: e.id,
-                    selected: false
-                })
-            }
-
+            var nodes = []
             var selectedState = []
+            let signals = {}
+            var connectedCables = []
+            for(const e of document.getElementsByClassName("node")) {
+                e.onclick = (e) => {
+                    OnNodeClicked(e.target.id)
+                }
+                nodes.push({
+                    id: e.id,
+                    selected: false,
+                    type: e.getAttribute("type") ?? "node"
+                })
+                if(e.hasAttribute("connectedWith")) {
+                    connectedCables.push({from: e.id, to: e.getAttribute("connectedWith"), mutable: false, oneway: false})
+                }
+            }
+            RenderUI()
 
-            function UpdateHole(id, action) {
-                for(const e of holes) {
+
+            function UpdateNode(id, action) {
+                for(const e of nodes) {
                     if(e.id == id) {
                         action(e)
                     }
                 }
             }
 
-            function OnHoleClicked(id) {
-                UpdateHole(id, e => e.selected = true)
+            function OnNodeClicked(id) {
+                if(document.getElementById(id).hasAttribute("disabled")) return
+                UpdateNode(id, e => e.selected = !e.selected)
                 CheckConnections()
+                SendSignal()
                 RenderUI()
             }
 
-            var connectedCables = []
+            function SendSignal() {
+                // lol
+                power = nodes.filter(x => x.type == "power")
+                signals = {}
+                for(const p of power) {
+                    signals[p.id] = {active: true}
+                }
+                for(let i = 0; i < 100; i++) {
+                    Step()
+                    console.log(signals)
+                    // ToDo: step only the required amount of times
+                }
 
-            function GetSelectedHoles() {
-                return holes.filter(x => x.selected)
+            }
+
+
+            function Step() {
+                for(const [key, value] of Object.entries(signals)) {
+                    let connections = connectedCables.filter(x => x.from == key || x.to == key)
+                    if(connections.length <= 0) continue;
+                    for(const c of connections) {
+                        signals[c.to == key ? c.from : c.to] = value // give forward value to next node
+                    }
+                }
+            }
+
+            function GetSelectedNodes() {
+                return nodes.filter(x => x.selected)
             }
 
             function CheckConnections() {
-                let selectedHoles = GetSelectedHoles()
+                let selectedNodes = GetSelectedNodes()
                 for(let i = 0; i < connectedCables.length; i++) {
-                    for(let j = 0; j < connectedCables.length; j++) {
-                        // Remove connections when one already exists
+                    if(connectedCables[i].mutable && selectedNodes.some(x => x.id == connectedCables[i].from || x.id == connectedCables[i].to)) {
+                        connectedCables.splice(i)
+                        i--;
                     }
                 }
-                if(connectedCables.some(x => x.some(y => selectedHoles.map(x => x.id).includes(y)))) {
-                    already
-                }
                             
-                if(selectedHoles.length >= 2) {
-                    connectedCables.push([selectedHoles[0].id, selectedHoles[1].id])
-                    UpdateHole(selectedHoles[0].id, x => x.selected = false)
-                    UpdateHole(selectedHoles[1].id, x => x.selected = false)
-                    selectedHoles[0]
-                    selectedHoles = []
+                if(selectedNodes.length >= 2) {
+                    connectedCables.push({from: selectedNodes[0].id, to: selectedNodes[1].id, mutable: true, oneway: false})
+                    UpdateNode(selectedNodes[0].id, x => x.selected = false)
+                    UpdateNode(selectedNodes[1].id, x => x.selected = false)
+
                 }
+            }
+
+            function GetSignal(id) {
+                return signals[id] ?? {}
             }
 
             function RenderUI() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                for(const e of holes) {
-                    let classes = "hole "
+                for(const e of nodes) {
+                    let classes = "node "
                     if(e.selected) classes += "selected "
+                    if(e.type == "power") classes += "power "
+                    if(e.type == "light") classes += "light " + (GetSignal(e.id).active ? "lightActive " : "")
                     document.getElementById(e.id).className = classes
                 }
                 for (var i = 0; i < connectedCables.length; i++) {
                     var c = connectedCables[i];
                     console.log(c)
-                    let from = document.getElementById(c[0])
-                    let to = document.getElementById(c[1])
+                    let from = document.getElementById(c.from)
+                    let to = document.getElementById(c.to)
                     ctx.beginPath();
-                    let fromX = from.offsetLeft + from.clientWidth / 2
-                    let fromY = from.offsetTop + from.clientHeight / 2
-                    let toX = to.offsetLeft + to.clientWidth / 2
-                    let toY = to.offsetTop + to.clientHeight / 2
+                    let fromX = from.offsetLeft + from.clientWidth / 2 - canvas.offsetLeft
+                    let fromY = from.offsetTop + from.clientHeight / 2 - canvas.offsetTop
+                    let toX = to.offsetLeft + to.clientWidth / 2- canvas.offsetLeft
+                    let toY = to.offsetTop + to.clientHeight / 2- canvas.offsetTop
                     console.log(fromX + " - "  + fromY)
+                    ctx.strokeStyle = c.mutable ? "#FF0000" : "#00FF00"
                     ctx.beginPath();
                     ctx.moveTo(fromX, fromY);
                     ctx.lineTo(toX, toY);
                     ctx.stroke();
-
                 }
             }
         </script>

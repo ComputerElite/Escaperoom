@@ -1,6 +1,10 @@
 body {
-    background-color: #34355a;
+    background-color: var(--bg);
     color: #EEEEEE;
+}
+
+:root {
+    --bg: #34355a
 }
 
 .grid {
@@ -20,7 +24,7 @@ body {
     height:100%;
 }
 
-.hole {
+.node {
     width: 50px;
     height: 50px;
     border-radius: 50%;
@@ -29,8 +33,24 @@ body {
     align-items: center;
     justify-content: center;
     z-index: 10;
+    margin: 20px;
+    background-color: var(--bg);
+}
+
+.light {
+    border: solid 3px #FF0000;
+}
+
+.lightActive {
+    background-color: #FF0000;
+    
 }
 
 .selected {
     background-color: #acac30;
+}
+
+.power {
+    background-color: #00AA00;
+    color: #111111;
 }
