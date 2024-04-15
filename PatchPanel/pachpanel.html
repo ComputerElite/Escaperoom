@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>patch panel</title>
+        <link rel="stylesheet" href="patchpanel.css">
+    </head>
+    <body>
+        <canvas id="canvas" width=300 height=300></canvas>
+        <div class="grid">
+            <div class="column">
+                <div class="hole" id="11">11</div>
+                <div class="hole" id="12">12</div>
+                <div class="hole" id="13">13</div>
+            </div>
+            <div class="column">
+                <div class="hole" id="21">21</div>
+                <div class="hole" id="22">22</div>
+                <div class="hole" id="23">23</div>
+            </div>
+        </div>
+        <script>
+            var canvas = document.getElementById("canvas");
+            var ctx = canvas.getContext("2d");
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = "#EE0000"
+
+            var offsetX = canvas.offsetLeft;
+            var offsetY = canvas.offsetTop;
+
+            var holes = []
+            for(const e of document.getElementsByClassName("hole")) {
+                e.onclick = (e) => {
+                    OnHoleClicked(e.target.id)
+                }
+                holes.push({
+                    id: e.id,
+                    selected: false
+                })
+            }
+
+            var selectedState = []
+
+            function UpdateHole(id, action) {
+                for(const e of holes) {
+                    if(e.id == id) {
+                        action(e)
+                    }
+                }
+            }
+
+            function OnHoleClicked(id) {
+                UpdateHole(id, e => e.selected = true)
+                CheckConnections()
+                RenderUI()
+            }
+
+            var connectedCables = []
+
+            function GetSelectedHoles() {
+                return holes.filter(x => x.selected)
+            }
+
+            function CheckConnections() {
+                let selectedHoles = GetSelectedHoles()
+                for(let i = 0; i < connectedCables.length; i++) {
+                    for(let j = 0; j < connectedCables.length; j++) {
+                        // Remove connections when one already exists
+                    }
+                }
+                if(connectedCables.some(x => x.some(y => selectedHoles.map(x => x.id).includes(y)))) {
+                    already
+                }
+                            
+                if(selectedHoles.length >= 2) {
+                    connectedCables.push([selectedHoles[0].id, selectedHoles[1].id])
+                    UpdateHole(selectedHoles[0].id, x => x.selected = false)
+                    UpdateHole(selectedHoles[1].id, x => x.selected = false)
+                    selectedHoles[0]
+                    selectedHoles = []
+                }
+            }
+
+            function RenderUI() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for(const e of holes) {
+                    let classes = "hole "
+                    if(e.selected) classes += "selected "
+                    document.getElementById(e.id).className = classes
+                }
+                for (var i = 0; i < connectedCables.length; i++) {
+                    var c = connectedCables[i];
+                    console.log(c)
+                    let from = document.getElementById(c[0])
+                    let to = document.getElementById(c[1])
+                    ctx.beginPath();
+                    let fromX = from.offsetLeft + from.clientWidth / 2
+                    let fromY = from.offsetTop + from.clientHeight / 2
+                    let toX = to.offsetLeft + to.clientWidth / 2
+                    let toY = to.offsetTop + to.clientHeight / 2
+                    console.log(fromX + " - "  + fromY)
+                    ctx.beginPath();
+                    ctx.moveTo(fromX, fromY);
+                    ctx.lineTo(toX, toY);
+                    ctx.stroke();
+
+                }
+            }
+        </script>
+    </body>
+</html>

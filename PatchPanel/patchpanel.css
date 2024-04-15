@@ -1,0 +1,36 @@
+body {
+    background-color: #34355a;
+    color: #EEEEEE;
+}
+
+.grid {
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+}
+
+#canvas {
+    position:absolute;
+    border:1px solid red;
+    width:100%;
+    height:100%;
+}
+
+.hole {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: solid 3px #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.selected {
+    background-color: #acac30;
+}
