@@ -88,11 +88,12 @@ class SinusNode extends Node {
     feedSignal(signal) {
         if(signal.active) return {
             active: true,
-            sinFrequency: 20,
+            sinFrequency: 1,
             sinOffset: 10,
             sinAmplitude: 50,
             sin: true
         }
+        return signal
     }
 }
 
@@ -105,15 +106,21 @@ class ModifyNode extends Node {
         this.modifySignalValue = htmlElement.getAttribute("modifySignalValue")
         this.sliderInput = document.getElementById(htmlElement.getAttribute("sliderId"))
         this.sliderInput.onchange = () => {
+            UpdateSignalsAndUI()
+        }
+        this.sliderInput.oninput = () => {
             
             UpdateSignalsAndUI()
         }
     }
     feedSignal(signal) {
+        console.log("before ")
         console.log(signal)
-        console.log(this.sliderInput.value)
+        console.log("slider " + this.sliderInput.value)
         if(signal[this.modifySignalValue]) {
+
             signal[this.modifySignalValue] *= this.sliderInput.value
+            console.log("after " + signal[this.modifySignalValue])
         }
         return signal
     }
@@ -153,15 +160,24 @@ class DisplayNode extends Node {
     renderCanvas(f) {
         this.ctx.beginPath()
         this.ctx.moveTo(0, this.correctYValue(f(0)))
+    
         for(let x = 0; x < this.canvas.width; x++) {
-            this.ctx.lineTo(x, this.correctYValue(f(x)))
+            this.ctx.lineTo(x, this.correctYValue(f(this.mapX(x))))
         }
         this.ctx.stroke()
+    }
+
+    mapX(x) {
+        return (x-this.canvas.width / 2) / this.canvas.width * 2 * 10
     }
 
     correctYValue(y) {
         return y + this.canvas.height / 2
     }
+}
+
+function CopySignal(obj) {
+    return JSON.parse(JSON.stringify(obj))
 }
 
 var canvas = document.getElementById("canvas");
@@ -234,7 +250,7 @@ function SendSignal() {
     for(const p of power) {
         signals[p.id] = p.getGeneratedSignal()
     }
-    for(let i = 0; i < 100; i++) {
+    for(let i = 0; i < connectedCables.length * 1.5; i++) {
         Step()
         // ToDo: step only the required amount of times
     }
@@ -248,7 +264,7 @@ function Step() {
         if(connections.length <= 0) continue;
         for(const c of connections) {
             let targetId = c.to == key ? c.from : c.to
-            signals[targetId] = nodes.find(x => x.id == targetId).feedSignal(value) // give forward value to next node
+            signals[targetId] = nodes.find(x => x.id == targetId).feedSignal(CopySignal(value)) // give forward value to next node
         }
     }
 }
