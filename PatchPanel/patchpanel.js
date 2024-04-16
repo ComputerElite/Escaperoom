@@ -84,6 +84,39 @@ class LightNode extends Node {
     }
 }
 
+class SinusNode extends Node {
+    feedSignal(signal) {
+        if(signal.active) return {
+            active: true,
+            sinFrequency: 50,
+            sinOffset: 10,
+            sinAmplitude: 50,
+            sin: true
+        }
+    }
+}
+
+class ModifyNode extends Node {
+    modifySignalValue = ""
+    sliderInput = null
+
+    constructor(htmlElement) {
+        super(htmlElement)
+        this.modifySignalValue = htmlElement.getAttribute("modifySignalValue")
+        this.sliderInput = document.getElementById(htmlElement.getAttribute("sliderId"))
+        this.sliderInput.onchange = () => {
+            RenderUI()
+        }
+    }
+    feedSignal(signal) {
+        console.log(signal)
+        if(signal[this.modifySignalValue]) {
+            signal[this.modifySignalValue] *= this.sliderInput.value
+        }
+        return signal
+    }
+}
+
 class DisplayNode extends Node {
     canvasId = ""
     canvas = null
@@ -104,7 +137,10 @@ class DisplayNode extends Node {
         let signal = GetSignal(this.id)
         this.htmlElement.className = classes
         this.clearCanvas()
-        if(signal.active) this.renderCanvas(x => 1)
+        if(signal.sin) {
+            this.renderCanvas(x => Math.sin(x*signal.sinFrequency+signal.sinOffset)*signal.sinAmplitude)
+        }
+        else if(signal.active) this.renderCanvas(x => 1)
     }
 
     clearCanvas() {
@@ -113,7 +149,6 @@ class DisplayNode extends Node {
     }
 
     renderCanvas(f) {
-
         this.ctx.beginPath()
         this.ctx.moveTo(0, this.correctYValue(f(0)))
         for(let x = 0; x < this.canvas.width; x++) {
@@ -162,6 +197,10 @@ function GetCorrectNodeType(node) {
             return new LightNode(node.htmlElement)
         case "display":
             return new DisplayNode(node.htmlElement)
+        case "sin":
+            return new SinusNode(node.htmlElement)
+        case "modify":
+            return new ModifyNode(node.htmlElement)
     }
 }
 
