@@ -88,7 +88,7 @@ class SinusNode extends Node {
     feedSignal(signal) {
         if(signal.active) return {
             active: true,
-            sinFrequency: 50,
+            sinFrequency: 20,
             sinOffset: 10,
             sinAmplitude: 50,
             sin: true
@@ -105,11 +105,13 @@ class ModifyNode extends Node {
         this.modifySignalValue = htmlElement.getAttribute("modifySignalValue")
         this.sliderInput = document.getElementById(htmlElement.getAttribute("sliderId"))
         this.sliderInput.onchange = () => {
-            RenderUI()
+            
+            UpdateSignalsAndUI()
         }
     }
     feedSignal(signal) {
         console.log(signal)
+        console.log(this.sliderInput.value)
         if(signal[this.modifySignalValue]) {
             signal[this.modifySignalValue] *= this.sliderInput.value
         }
@@ -181,7 +183,6 @@ for(const e of document.getElementsByClassName("node")) {
         OnNodeClicked(e.target.id)
     }
     let n = GetCorrectNodeType(new Node(e));
-    console.log(n)
     nodes.push(n)
     connectedCables.push(...n.getConnectedCables())
 }
@@ -217,6 +218,11 @@ function OnNodeClicked(id) {
     if(document.getElementById(id).hasAttribute("disabled")) return
     UpdateNode(id, e => e.selected = !e.selected)
     CheckConnections()
+    UpdateSignalsAndUI()
+}
+
+function UpdateSignalsAndUI() {
+
     SendSignal()
     RenderUI()
 }
@@ -230,7 +236,6 @@ function SendSignal() {
     }
     for(let i = 0; i < 100; i++) {
         Step()
-        console.log(signals)
         // ToDo: step only the required amount of times
     }
 
@@ -280,7 +285,6 @@ function RenderUI() {
     }
     for (var i = 0; i < connectedCables.length; i++) {
         var c = connectedCables[i];
-        console.log(c)
         let from = document.getElementById(c.from)
         let to = document.getElementById(c.to)
         ctx.beginPath();
@@ -288,7 +292,6 @@ function RenderUI() {
         let fromY = from.offsetTop + from.clientHeight / 2 - canvas.offsetTop
         let toX = to.offsetLeft + to.clientWidth / 2- canvas.offsetLeft
         let toY = to.offsetTop + to.clientHeight / 2- canvas.offsetTop
-        console.log(fromX + " - "  + fromY)
         ctx.strokeStyle = c.mutable ? "#FF0000" : "#00FF00"
         ctx.beginPath();
         ctx.moveTo(fromX, fromY);
