@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>patch panel</title>
+        <link rel="stylesheet" href="patchpanel.css">
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+    </head>
+    <body>
+        <canvas id="canvas" width=300 height=300></canvas>
+        <div class="grid">
+            <div class="column">
+                <div class="node" id="11" type="power">11</div>
+                <div class="node" id="12" connectedWith="21">12</div>
+                <div class="node" id="13">13</div>
+            </div>
+            <div class="column">
+                <div class="node" id="21">21</div>
+                <div class="node" id="22">22</div>
+                <div class="node" connectedWith="31" id="23">23</div>
+            </div>
+            <div class="column">
+                <div class="node" id="31" type="light" disabled>L</div>
+            </div>
+            <div class="column">
+                <div class="node" id="41" type="display" canvasId="display">D</div>
+                <canvas id="display" width="300" height="200"></canvas>
+            </div>
+        </div>
+        <h2>Legend</h2>
+        <h3>Node types</h3>
+        <div class="grid">
+            <div class="column">
+                <b>Light</b>
+                <br>
+                This node shines up when it receives power
+                <div class="node" id="l-1" type="light" disabled>L</div>
+            </div>
+            <div class="column">
+                <b>Power</b>
+                <br>
+                This node transmits power to all connected nodes
+                <div class="node" id="l-2" type="power" disabled>P</div>
+            </div>
+        </div>
+        <h3>Non user cable types</h3>
+        <div class="grid">
+            <div class="column">
+                <b>Fixed cable</b>
+                <br>
+                This cable cannot be removed or modified
+                <div class="grid">
+                    <div class="node" id="l-3" connectedWith="l-4" disabled>L3</div>
+                    <div class="node" id="l-4" disabled>L4</div>
+                </div>
+                
+            </div>
+        </div>
+
+        <script src="patchpanel.js"/>
+    </body>
+</html>
